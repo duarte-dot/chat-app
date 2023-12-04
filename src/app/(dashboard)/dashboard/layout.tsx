@@ -37,7 +37,7 @@ const Layout = async ({ children }: LayoutProps) => {
   const unseenRequestCount = (
     (await fetchRedis(
       "smembers",
-      `user:${session.user.id}:incoming_friend_requests:unseen`
+      `user:${session.user.id}:incoming_friend_requests`
     )) as User[]
   ).length;
 
