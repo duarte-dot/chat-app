@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return new Response("Unauthorized.", { status: 401 });
+      return new Response("Unauthorized", { status: 401 });
     }
 
     const isAlreadyFriends = (await fetchRedis(
@@ -45,12 +45,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const [rarUser, rawFriend] = (await Promise.all([
+    const [rawUser, rawFriend] = (await Promise.all([
       fetchRedis("get", `user:${session.user.id}`),
       fetchRedis("get", `user:${idToAdd}`),
     ])) as [string, string];
 
-    const user = JSON.parse(rarUser) as User;
+    const user = JSON.parse(rawUser) as User;
     const friend = JSON.parse(rawFriend) as User;
 
     await Promise.all([
@@ -64,19 +64,10 @@ export async function POST(req: Request) {
         "new_friend",
         friend
       ),
+      db.sadd(`user:${session.user.id}:friends`, idToAdd),
+      db.sadd(`user:${idToAdd}:friends`, session.user.id),
+      db.srem(`user:${session.user.id}:incoming_friend_requests`, idToAdd),
     ]);
-
-    pusherServer.trigger(
-      pusherKeyFormatter(`user:${idToAdd}:friends`),
-      "new_friend",
-      ""
-    );
-
-    await db.sadd(`user:${session.user.id}:friends`, idToAdd);
-    await db.sadd(`user:${idToAdd}:friends`, session.user.id);
-
-    await db.srem(`user:${session.user.id}:incoming_friend_requests`, idToAdd);
-    // await db.srem(`user:${idToAdd}:outgoing_friend_requests`, session.user.id);
 
     return new Response("Friend request accepted.", { status: 200 });
   } catch (error) {
