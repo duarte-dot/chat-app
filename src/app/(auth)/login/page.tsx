@@ -6,9 +6,9 @@ import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
-interface pageProps {}
+interface PageProps {}
 
-const page: FC<pageProps> = ({}) => {
+const Page: FC<PageProps> = ({}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function loginWithGoogle() {
@@ -80,4 +80,4 @@ const page: FC<pageProps> = ({}) => {
   );
 };
 
-export default page;
+export default Page;
