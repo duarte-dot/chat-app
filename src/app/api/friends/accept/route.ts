@@ -66,6 +66,12 @@ export async function POST(req: Request) {
       ),
     ]);
 
+    pusherServer.trigger(
+      pusherKeyFormatter(`user:${idToAdd}:friends`),
+      "new_friend",
+      ""
+    );
+
     await db.sadd(`user:${session.user.id}:friends`, idToAdd);
     await db.sadd(`user:${idToAdd}:friends`, session.user.id);
 
