@@ -54,12 +54,12 @@ export async function POST(req: Request) {
     const friend = JSON.parse(rawFriend) as User;
 
     await Promise.all([
-      pusherServer.trigger(
+      await pusherServer.trigger(
         pusherKeyFormatter(`user:${idToAdd}:friends`),
         "new_friend",
         user
       ),
-      pusherServer.trigger(
+      await pusherServer.trigger(
         pusherKeyFormatter(`user:${session.user.id}:friends`),
         "new_friend",
         friend
