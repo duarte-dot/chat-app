@@ -24,6 +24,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
   const [activeChats, setActiveChats] = useState<User[]>(friends);
 
   useEffect(() => {
+    console.log('use effect')
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:chats`));
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:friends`));
 
@@ -65,6 +66,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
   }, [pathname, sessionId, router]);
 
   useEffect(() => {
+    console.log('use effect')
     if (pathname?.includes("chat")) {
       setUnseenMessages((prev) => {
         return prev.filter((msg) => !pathname.includes(msg.senderId));

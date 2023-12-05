@@ -32,6 +32,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
   const pathname = usePathname();
 
   useEffect(() => {
+    console.log('use effect')
     setOpen(false);
   }, [pathname]);
 
