@@ -49,13 +49,13 @@ export async function POST(req: Request) {
 
     const message = messageValidator.parse(messageData);
 
-    await pusherServer.trigger(
+    pusherServer.trigger(
       pusherKeyFormatter(`chat:${chatId}`),
       "incoming-message",
       message
     );
 
-    await pusherServer.trigger(
+    pusherServer.trigger(
       pusherKeyFormatter(`user:${friendId}:chats`),
       "new_message",
       {
