@@ -1,6 +1,8 @@
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
+import { pusherKeyFormatter } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 
@@ -42,6 +44,27 @@ export async function POST(req: Request) {
         }
       );
     }
+
+    const [rarUser, rawFriend] = (await Promise.all([
+      fetchRedis("get", `user:${session.user.id}`),
+      fetchRedis("get", `user:${idToAdd}`),
+    ])) as [string, string];
+
+    const user = JSON.parse(rarUser) as User;
+    const friend = JSON.parse(rawFriend) as User;
+
+    await Promise.all([
+      pusherServer.trigger(
+        pusherKeyFormatter(`user:${idToAdd}:friends`),
+        "new_friend",
+        user
+      ),
+      pusherServer.trigger(
+        pusherKeyFormatter(`user:${session.user.id}:friends`),
+        "new_friend",
+        friend
+      ),
+    ]);
 
     await db.sadd(`user:${session.user.id}:friends`, idToAdd);
     await db.sadd(`user:${idToAdd}:friends`, session.user.id);
