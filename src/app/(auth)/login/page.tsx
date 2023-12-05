@@ -27,8 +27,8 @@ const Page: FC<PageProps> = ({}) => {
       <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full flex flex-col items-center max-w-md space-y-8">
           <div className="flex flex-col items-center gap-8"></div>
-          <Image
-            src="https://private-user-images.githubusercontent.com/78454964/288195295-2e9e8e19-29b5-466e-9e3f-57536c8d36dd.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDE4MDg0NzEsIm5iZiI6MTcwMTgwODE3MSwicGF0aCI6Ii83ODQ1NDk2NC8yODgxOTUyOTUtMmU5ZThlMTktMjliNS00NjZlLTllM2YtNTc1MzZjOGQzNmRkLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzEyMDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMjA1VDIwMjkzMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTY0YmRiNmMyZTJhY2FmYWM5ZTY1NmE1Y2QyMTVlMWQwOGExZmZmYzI3OGY4ZjNkM2VkMDYyNDBjZDEwY2Y5Y2ImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.a1qHPDZ3qn2b57IipDLsP-dw1z78knsQ0SQyg6iAfcw"
+          <img
+            src={`static/chats-logo.png`}
             alt="logo"
             width={300}
             height={300}
