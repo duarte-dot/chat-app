@@ -26,9 +26,9 @@ Aqui estão algumas das principais dependências usadas neste projeto:
 - **typescript:** Superset tipado do JavaScript.
 - **zod:** Declaração e validação de esquemas com foco em TypeScript.
 
-Certifique-se de verificar o arquivo `package.json` para obter a lista completa de dependências e suas versões.
+Certifique-se de verificar o arquivo `package.json` para obter a lista completa de dependências e suas versão.
 
-## Como Começar
+# Como Começar
 
 Para começar com o Chat App, siga estas etapas:
 
@@ -70,9 +70,41 @@ PUSHER_APP_SECRET=seu_pusher_secret
 
 Sinta-se à vontade para explorar e personalizar o aplicativo de acordo com suas necessidades!
 
-## Escolhas tecnológicas feitas durante o desenvolvimento.
+# Escolhas tecnológicas feitas durante o desenvolvimento.
 
-## Contribuições
+### Upstash (Redis)
+
+Utilizei o Upstash para armazenamento em cache e dados em tempo real. Sua facilidade de uso e integração eficiente tornam-no uma escolha ideal.
+
+### NextAuth com Google Provider
+
+NextAuth oferece uma solução simples e segura para autenticação social, enquanto a integração com o Google proporciona familiaridade aos usuários.
+
+### Next.js
+
+Next.js, uma estrutura React, oferece SSR e pré-renderização estática para melhor desempenho e experiência do usuário.
+
+### Tailwind CSS
+
+Tailwind CSS simplifica a estilização com sua abordagem "utility-first", proporcionando flexibilidade e eficiência.
+
+### React Hook Form
+
+React Hook Form simplifica a gestão de formulários em React, tornando a validação e manipulação de dados mais eficientes.
+
+### Axios
+
+Axios para requisições HTTP
+
+### Zod
+
+Zod, uma biblioteca de validação TypeScript, aprimora a integridade e confiabilidade dos dados.
+
+### Vercel
+
+Vercel fornece uma plataforma eficiente e escalável para hospedagem, com integração contínua e deploy automatizado.
+
+# Contribuições
 
 Contribuições são bem-vindas! Se encontrar problemas ou tiver sugestões de melhorias, abra uma issue ou crie uma pull request.
 
