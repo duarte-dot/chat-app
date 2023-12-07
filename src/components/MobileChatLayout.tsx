@@ -32,7 +32,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
   const pathname = usePathname();
 
   useEffect(() => {
-    console.log('use effect')
+    //console.log('use effect')
     setOpen(false);
   }, [pathname]);
 
@@ -147,6 +147,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
                                     className="rounded-full"
                                     src={session.user.image || ""}
                                     alt="Your profile picture"
+                                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                                   />
                                 </div>
 

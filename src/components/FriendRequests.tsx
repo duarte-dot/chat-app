@@ -22,7 +22,7 @@ const FriendRequests: FC<FriendRequestsProps> = ({
   );
 
   useEffect(() => {
-    console.log('use effect')
+    //console.log('use effect')
     pusherClient.subscribe(
       pusherKeyFormatter(`user:${sessionId}:incoming_friend_requests`)
     );

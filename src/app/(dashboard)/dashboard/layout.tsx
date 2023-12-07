@@ -12,6 +12,9 @@ import { notFound } from "next/navigation";
 import { FC, ReactNode } from "react";
 import MobileChatLayout from "@/components/MobileChatLayout";
 import { SidebarOption } from "@/types/typings";
+import GroupSidebarOption from "@/components/GroupSidebarOption";
+import SidebarGroupChatList from "@/components/SidebarGroupChatList";
+import { getGroupsByUserId } from "@/helpers/get-groups-by-user-id";
 
 interface LayoutProps {
   children: ReactNode;
@@ -32,6 +35,7 @@ const Layout = async ({ children }: LayoutProps) => {
   if (!session) notFound();
 
   const friends = await getFriendsByUserId(session.user.id);
+  const groups = await getGroupsByUserId(session.user.id);
 
   const unseenRequestCount = (
     (await fetchRedis(
@@ -66,6 +70,10 @@ const Layout = async ({ children }: LayoutProps) => {
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <SidebarChatList friends={friends} sessionId={session.user.id} />
+              <SidebarGroupChatList
+                groupChats={groups}
+                sessionId={session.user.id}
+              />
             </li>
             <li>
               <div className="text-xs font-semibold leading-6 text-gray-400">
@@ -96,6 +104,12 @@ const Layout = async ({ children }: LayoutProps) => {
                     initialUnseenRequestCount={unseenRequestCount}
                   />
                 </li>
+                <li>
+                  <GroupSidebarOption
+                    sessionId={session.user.id}
+                    initialUnseenRequestCount={unseenRequestCount}
+                  />
+                </li>
               </ul>
             </li>
 
@@ -108,6 +122,7 @@ const Layout = async ({ children }: LayoutProps) => {
                     className="rounded-full"
                     src={session.user.image || ""}
                     alt="Your profile picture"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                   />
                 </div>
 

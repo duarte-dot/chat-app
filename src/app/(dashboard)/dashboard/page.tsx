@@ -18,7 +18,9 @@ const page = async ({}) => {
     friends.map(async (friend) => {
       const [lastMessageRaw] = (await fetchRedis(
         "zrange",
-        `chat:${chatHrefConstructor(session.user.id, friend.id)}:messages`,
+        `chat:${chatHrefConstructor(
+          `${session.user.id + friend.id}`
+        )}:messages`,
         -1,
         -1
       )) as string[];
@@ -49,8 +51,7 @@ const page = async ({}) => {
 
             <Link
               href={`/dashboard/chat/${chatHrefConstructor(
-                session.user.id,
-                friend.id
+                `${session.user.id + friend.id}`
               )}`}
               className="relative sm:flex"
             >
@@ -61,6 +62,7 @@ const page = async ({}) => {
                     className="rounded-full"
                     alt={`${friend.name} profile picture`}
                     src={friend.image}
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                     fill
                   />
                 </div>

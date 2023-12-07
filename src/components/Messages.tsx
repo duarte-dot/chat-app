@@ -12,20 +12,20 @@ interface MessagesProps {
   sessionId: string;
   chatId: string;
   sessionImg: string | null | undefined;
-  chatPartner: User;
+  chatPartners: User[];
 }
 
 const Messages: FC<MessagesProps> = ({
   initialMessages,
   sessionId,
   chatId,
-  chatPartner,
+  chatPartners,
   sessionImg,
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   useEffect(() => {
-    console.log('use effect')
+    console.log("use effect");
     pusherClient.subscribe(pusherKeyFormatter(`chat:${chatId}`));
 
     const messageHandler = (message: Message) => {
@@ -54,6 +54,10 @@ const Messages: FC<MessagesProps> = ({
       <div ref={scrollDownRef} />
       {messages.map((message, index) => {
         const isCurrentUser = message.senderId === sessionId;
+
+        const chatPartner = chatPartners.find(
+          (partner) => partner.id === message.senderId
+        );
 
         const hasNextMessageFromSameUser =
           messages[index - 1]?.senderId === messages[index].senderId;
@@ -106,8 +110,9 @@ const Messages: FC<MessagesProps> = ({
                   alt="Profile picture"
                   referrerPolicy="no-referrer"
                   src={
-                    isCurrentUser ? (sessionImg as string) : chatPartner.image
+                    isCurrentUser ? sessionImg || "" : chatPartner?.image || ""
                   }
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                   className="rounded-full"
                 />
               </div>

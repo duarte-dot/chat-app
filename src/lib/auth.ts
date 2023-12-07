@@ -25,8 +25,8 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: getGoogleCredentials().clientId,
-      clientSecret: getGoogleCredentials().clientSecret,
+      clientId: '902720232287-0pi1qo94pr7meb0vuoccqoedo4gnkv6m.apps.googleusercontent.com',
+      clientSecret: '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',
     }),
   ],
   callbacks: {

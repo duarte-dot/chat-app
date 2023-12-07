@@ -29,7 +29,7 @@ const UnseenChatToast: FC<UnseenChatToastProps> = ({
     >
       <a
         onClick={() => toast.dismiss(t.id)}
-        href={`/dashboard/chat/${chatHrefConstructor(sessionId, senderId)}`}
+        href={`/dashboard/chat/${chatHrefConstructor(sessionId + senderId)}`}
         className="flex-1 w-0 p-4"
       >
         <div className="flex items-start">
@@ -41,6 +41,7 @@ const UnseenChatToast: FC<UnseenChatToastProps> = ({
                 className="rounded-full"
                 src={senderImg}
                 alt={`${senderName} profile picture`}
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
               />
             </div>
           </div>

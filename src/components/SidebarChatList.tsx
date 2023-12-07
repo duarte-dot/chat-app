@@ -24,7 +24,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
   const [activeChats, setActiveChats] = useState<User[]>(friends);
 
   useEffect(() => {
-    console.log('use effect')
+    //console.log('use effect')
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:chats`));
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:friends`));
 
@@ -35,7 +35,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
     const chatHandler = (message: ExtendedMessage) => {
       const shouldNotify =
         pathname !==
-        `/dashboard/chat/${chatHrefConstructor(sessionId, message.senderId)}`;
+        `/dashboard/chat/${chatHrefConstructor(`${sessionId + message.senderId}`)}`;
 
       if (!shouldNotify) return;
 
@@ -66,7 +66,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
   }, [pathname, sessionId, router]);
 
   useEffect(() => {
-    console.log('use effect')
+    //console.log('use effect')
     if (pathname?.includes("chat")) {
       setUnseenMessages((prev) => {
         return prev.filter((msg) => !pathname.includes(msg.senderId));
@@ -84,10 +84,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({ friends, sessionId }) => {
         return (
           <li key={friend.id}>
             <a
-              href={`/dashboard/chat/${chatHrefConstructor(
-                sessionId,
-                friend.id
-              )}`}
+              href={`/dashboard/chat/${chatHrefConstructor(sessionId + friend.id)}`}
               className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex items-center gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
             >
               {friend.name}

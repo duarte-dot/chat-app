@@ -10,10 +10,24 @@ interface Chat {
   messages: Message[];
 }
 
+interface GroupChat {
+  groupId: string;
+  groupName: string;
+  members: string[];
+}
+
 interface Message {
   id: string;
   senderId: string;
   receiverId: string;
+  text: string;
+  timestamp: number;
+}
+
+interface GroupMessage {
+  id: string;
+  senderId: string;
+  groupId: string;
   text: string;
   timestamp: number;
 }
