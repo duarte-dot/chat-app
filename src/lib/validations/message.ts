@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const messageValidator = z.object({
   id: z.string(),
+  chatId: z.string(),
   senderId: z.string(),
   text: z.string(),
   timestamp: z.number(),

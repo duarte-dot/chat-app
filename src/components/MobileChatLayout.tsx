@@ -9,13 +9,15 @@ import { Icons } from "./Icons";
 import SignOutButton from "./SignOutButton";
 import Button, { buttonVariants } from "./ui/Button";
 import FriendRequestSidebarOptions from "./FriendRequestsSidebarOption";
-import SidebarChatList from "./SidebarChatList";
 import { Session } from "next-auth";
 import { SidebarOption } from "@/types/typings";
 import { usePathname } from "next/navigation";
+import CombinedSidebarChatList from "./CombinedSidebarChatList";
+import GroupSidebarOption from "./GroupSidebarOption";
 
 interface MobileChatLayoutProps {
   friends: User[];
+  groups: GroupChat[];
   session: Session;
   sidebarOptions: SidebarOption[];
   unseenRequestCount: number;
@@ -26,13 +28,13 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
   session,
   sidebarOptions,
   unseenRequestCount,
+  groups,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const pathname = usePathname();
 
   useEffect(() => {
-    console.log('use effect')
     setOpen(false);
   }, [pathname]);
 
@@ -43,7 +45,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
           href="/dashboard"
           className={buttonVariants({ variant: "ghost" })}
         >
-          <Icons.Logo className="h-6 w-auto text-indigo-600" />
+          <Icons.Logo className="h-4 w-auto text-indigo-600" />
         </Link>
         <Button onClick={() => setOpen(true)} className="gap-4">
           Menu <Menu className="h-6 w-6" />
@@ -97,9 +99,10 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
                             className="flex flex-1 flex-col gap-y-7"
                           >
                             <li>
-                              <SidebarChatList
-                                friends={friends}
+                              <CombinedSidebarChatList
                                 sessionId={session.user.id}
+                                friends={friends}
+                                groups={groups}
                               />
                             </li>
 
@@ -135,6 +138,11 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
                                     sessionId={session.user.id}
                                   />
                                 </li>
+
+                                <GroupSidebarOption
+                                  sessionId={session.user.id}
+                                  initialUnseenRequestCount={unseenRequestCount}
+                                />
                               </ul>
                             </li>
 
@@ -147,6 +155,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({
                                     className="rounded-full"
                                     src={session.user.image || ""}
                                     alt="Your profile picture"
+                                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                                   />
                                 </div>
 

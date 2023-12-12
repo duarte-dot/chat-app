@@ -1,6 +1,5 @@
 import FriendRequestsSidebarOption from "@/components/FriendRequestsSidebarOption";
-import { Icon, Icons } from "@/components/Icons";
-import SidebarChatList from "@/components/SidebarChatList";
+import { Icons } from "@/components/Icons";
 import SignOutButton from "@/components/SignOutButton";
 import { getFriendsByUserId } from "@/helpers/get-friends-by-user-id";
 import { fetchRedis } from "@/helpers/redis";
@@ -9,9 +8,12 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FC, ReactNode } from "react";
+import { ReactNode } from "react";
 import MobileChatLayout from "@/components/MobileChatLayout";
 import { SidebarOption } from "@/types/typings";
+import GroupSidebarOption from "@/components/GroupSidebarOption";
+import { getGroupsByUserId } from "@/helpers/get-groups-by-user-id";
+import CombinedSidebarChatList from "@/components/CombinedSidebarChatList";
 
 interface LayoutProps {
   children: ReactNode;
@@ -32,6 +34,7 @@ const Layout = async ({ children }: LayoutProps) => {
   if (!session) notFound();
 
   const friends = await getFriendsByUserId(session.user.id);
+  const groups = await getGroupsByUserId(session.user.id);
 
   const unseenRequestCount = (
     (await fetchRedis(
@@ -45,6 +48,7 @@ const Layout = async ({ children }: LayoutProps) => {
       <div className="md:hidden">
         <MobileChatLayout
           friends={friends}
+          groups={groups}
           session={session}
           sidebarOptions={sidebarOptions}
           unseenRequestCount={unseenRequestCount}
@@ -52,9 +56,9 @@ const Layout = async ({ children }: LayoutProps) => {
       </div>
 
       <div className="hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-        <Link href="/dashboard" className="flex h-16 shrink-0 items-center">
+        <a href="/dashboard" className="flex h-16 shrink-0 items-center">
           <Icons.Logo className="h-8 w-auto text-indigo-600"></Icons.Logo>
-        </Link>
+        </a>
 
         {friends.length > 0 && (
           <div className="text-xs font-semibold leading-6 text-gray-400">
@@ -65,7 +69,11 @@ const Layout = async ({ children }: LayoutProps) => {
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
-              <SidebarChatList friends={friends} sessionId={session.user.id} />
+              <CombinedSidebarChatList
+                sessionId={session.user.id}
+                friends={friends}
+                groups={groups}
+              />
             </li>
             <li>
               <div className="text-xs font-semibold leading-6 text-gray-400">
@@ -96,6 +104,12 @@ const Layout = async ({ children }: LayoutProps) => {
                     initialUnseenRequestCount={unseenRequestCount}
                   />
                 </li>
+                <li>
+                  <GroupSidebarOption
+                    sessionId={session.user.id}
+                    initialUnseenRequestCount={unseenRequestCount}
+                  />
+                </li>
               </ul>
             </li>
 
@@ -108,6 +122,7 @@ const Layout = async ({ children }: LayoutProps) => {
                     className="rounded-full"
                     src={session.user.image || ""}
                     alt="Your profile picture"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                   />
                 </div>
 

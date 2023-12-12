@@ -7,11 +7,11 @@ import TextareaAutosize from "react-textarea-autosize";
 import Button from "./ui/Button";
 
 interface ChatInputProps {
-  chatPartner: User;
+  chatPartners: User[];
   chatId: string;
 }
 
-const ChatInput: FC<ChatInputProps> = ({ chatPartner, chatId }) => {
+const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
@@ -45,7 +45,7 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartner, chatId }) => {
           rows={1}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`Message ${chatPartner.name}`}
+          placeholder={`...`}
           className="block w-full resize-none border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:py-1.5 sm:text-sm sm:leading-6"
         />
 

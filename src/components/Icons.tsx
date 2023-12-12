@@ -5,7 +5,7 @@ export const Icons = {
     <svg
       version="1.0"
       xmlns="http://www.w3.org/2000/svg"
-      width="60.000000pt"
+      width="40.000000pt"
       height="60.000000pt"
       viewBox="0 0 2400.000000 2400.000000"
       preserveAspectRatio="xMidYMid meet"
