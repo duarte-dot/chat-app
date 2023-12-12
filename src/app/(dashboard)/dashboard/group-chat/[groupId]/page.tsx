@@ -15,11 +15,11 @@ interface PageProps {
 }
 
 const Page = async ({ params }: PageProps) => {
-  async function getChatMessages(chatId: string) {
+  async function getChatMessages(groupId: string) {
     try {
       const results: string[] = await fetchRedis(
         "zrange",
-        `chat:${chatId}:messages`,
+        `group-chat:${groupId}:messages`,
         0,
         -1
       );
@@ -44,14 +44,14 @@ const Page = async ({ params }: PageProps) => {
 
   const session = await getServerSession(authOptions);
 
-  const rawGroup = await fetchRedis("smembers", `group:${groupId}`);
+  const rawGroup = (await fetchRedis("smembers", `group:${groupId}`)) as string;
   const group = JSON.parse(rawGroup) as GroupChat;
 
   const membersOfGroup = group.members;
 
   const rawMembers = await Promise.all(
     membersOfGroup.map(async (member) => {
-      return await fetchRedis("get", `user:${member}`);
+      return (await fetchRedis("get", `user:${member}`)) as string;
     })
   );
 
@@ -60,37 +60,13 @@ const Page = async ({ params }: PageProps) => {
   return (
     <>
       <div className="flex-1 justify-between flex flex-col h-full max-h-[calc(100vh-6rem)]">
-        {members.map((chatPartner) => (
-          <div
-            key={chatPartner.id}
-            className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200"
-          >
-            <div className="relative flex items-center space-x-4">
-              <div className="relative">
-                <div className="relative w-8 sm:w-12 h-8 sm:h-12">
-                  <Image
-                    fill
-                    referrerPolicy="no-referrer"
-                    src={chatPartner.image}
-                    alt={`${chatPartner.name}'s profile picture`}
-                    className="rounded-full"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col leading-tight">
-                <div className="text-x1 flex items-center">
-                  <span className="text-gray-700 mr-3 font-semibold">
-                    {chatPartner.name}
-                  </span>
-                </div>
-
-                <span className="text-sm text-gray-600">{chatPartner.email}</span>
-              </div>
-            </div>
+        <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
+          <div className="relative flex items-center space-x-4">
+            <span className="text-gray-700 mr-3 font-semibold">
+              {members.map((chatPartner) => chatPartner.name).join(", ")}
+            </span>
           </div>
-        ))}
+        </div>
 
         <Messages
           chatId={groupId}

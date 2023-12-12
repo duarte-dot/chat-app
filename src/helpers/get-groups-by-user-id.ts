@@ -7,10 +7,10 @@ export const getGroupsByUserId = async (userId: string) => {
   )) as string[];
 
   const groups = await Promise.all(
-    groupIds.map(async (groupId) => {
+    groupIds.map(async (id) => {
       const group = (await fetchRedis(
         "smembers",
-        `group:${groupId}`
+        `group:${id}`
       )) as string;
       const parsedGroup = JSON.parse(group);
       return parsedGroup as GroupChat;

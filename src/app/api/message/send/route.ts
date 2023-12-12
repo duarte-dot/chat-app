@@ -6,7 +6,6 @@ import { pusherKeyFormatter } from "@/lib/utils";
 import { Message, messageValidator } from "@/lib/validations/message";
 import { nanoid } from "nanoid";
 import { getServerSession } from "next-auth";
-import { usePathname } from "next/navigation";
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +18,6 @@ export async function POST(req: Request) {
     const userIds = chatId.split("--");
 
     if (!userIds.includes(userId) && chatId.length === 74) {
-      console.log(chatId);
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -43,6 +41,7 @@ export async function POST(req: Request) {
 
     const messageData: Message = {
       id: nanoid(),
+      chatId: chatId,
       senderId: userId,
       text,
       timestamp,
@@ -50,17 +49,27 @@ export async function POST(req: Request) {
 
     const message = messageValidator.parse(messageData);
 
-    // Determine the Redis key prefix based on the number of users
     const redisKeyPrefix = userIds.length > 2 ? "group-chat" : "chat";
 
-    // Broadcast a message to the chat channel
     await pusherServer.trigger(
       pusherKeyFormatter(`${redisKeyPrefix}:${chatId}`),
       "incoming-message",
       message
     );
 
-    // Broadcast a new message event to each user in the group
+    let grpName = "www";
+
+    if (messageData.chatId.length > 74) {
+      const group = (await fetchRedis(
+        "smembers",
+        `group:${message.chatId}`
+      )) as string;
+
+      const groupParsed = JSON.parse(group) as GroupChat;
+
+      grpName = groupParsed.name;
+    }
+
     userIds.forEach(async (friendId) => {
       await pusherServer.trigger(
         pusherKeyFormatter(`user:${friendId}:chats`),
@@ -68,12 +77,14 @@ export async function POST(req: Request) {
         {
           ...message,
           senderImg: sender.image,
+          groupName: message.chatId.length > 74 ? grpName : sender.name,
           senderName: sender.name,
+          senderId: sender.id,
+          senderEmail: sender.email,
         }
       );
     });
 
-    // Add the message to the Redis sorted set
     await db.zadd(`${redisKeyPrefix}:${chatId}:messages`, {
       score: timestamp,
       member: JSON.stringify(message),

@@ -10,10 +10,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { groupId, userIdsToAdd, groupName } = z
+    const { id, userIdsToAdd, name } = z
       .object({
-        groupId: z.string(),
-        groupName: z.string(),
+        id: z.string(),
+        name: z.string(),
         userIdsToAdd: z.array(string()),
       })
       .parse(body);
@@ -23,22 +23,50 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    db.sadd(`user:${session.user.id}:groups`, groupId);
-    userIdsToAdd.forEach(async (userIdToAdd) => {
-      await db.sadd(`user:${userIdToAdd}:groups`, groupId);
-    });
-
-    const userIdsToAddAndGroupName = {
-      groupId: groupId,
-      groupName: groupName,
-      members: userIdsToAdd,
+    const userIdsToAddAndName = {
+      id: id,
+      name: name,
+      members: [session.user.id, ...userIdsToAdd],
     };
 
-    db.sadd(`group:${groupId}`, userIdsToAddAndGroupName);
+    if (userIdsToAddAndName.members.length <= 2) {
+      return new Response("A group must have at least three members.", {
+        status: 422,
+      });
+    }
 
-    return new Response("User added to the group successfully.", {
-      status: 200,
-    });
+    if (!name) {
+      return new Response("A group must have a name.", { status: 422 });
+    }
+
+    const existingGroup = await fetchRedis("smembers", `group:${id}`);
+
+    if (existingGroup.length > 0) {
+      return new Response("This group already exists.", { status: 400 });
+    }
+
+    await Promise.all([
+      pusherServer.trigger(
+        pusherKeyFormatter(`user:${session.user.id}:groups`),
+        "new_group",
+        userIdsToAddAndName
+      ),
+
+      db.sadd(`user:${session.user.id}:groups`, id),
+      ...userIdsToAdd.map(async (userIdToAdd) => {
+        await pusherServer.trigger(
+          pusherKeyFormatter(`user:${userIdToAdd}:groups`),
+          "new_group",
+          userIdsToAddAndName
+        );
+
+        db.sadd(`user:${userIdToAdd}:groups`, id);
+      }),
+
+      db.sadd(`group:${id}`, JSON.stringify(userIdsToAddAndName)),
+    ]);
+
+    return new Response("Group created successfully.", { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response("Invalid request payload", { status: 422 });

@@ -10,12 +10,14 @@ interface UnseenChatToastProps {
   senderImg: string;
   senderName: string;
   senderMessage: string;
+  sessionGroup?: GroupChat;
 }
 
 const UnseenChatToast: FC<UnseenChatToastProps> = ({
   t,
   sessionId,
   senderId,
+  sessionGroup,
   senderImg,
   senderName,
   senderMessage,
@@ -47,7 +49,11 @@ const UnseenChatToast: FC<UnseenChatToastProps> = ({
           </div>
 
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-gray-900">{senderName}</p>
+            <p className="text-sm font-medium text-gray-900">
+              {!sessionGroup
+                ? `${senderName}`
+                : `${senderName} | ${sessionGroup.name}`}
+            </p>
             <p className="mt-1 text-sm text-gray-500">{senderMessage}</p>
           </div>
         </div>

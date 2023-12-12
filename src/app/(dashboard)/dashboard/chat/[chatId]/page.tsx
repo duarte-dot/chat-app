@@ -4,6 +4,7 @@ import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { messageArrayValidator } from "@/lib/validations/message";
+import { User } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -46,7 +47,6 @@ const page = async ({ params }: pageProps) => {
 
   const users = chatId.split("--");
 
-  // Verifica se o usuário faz parte do grupo
   if (!users.includes(userId)) notFound();
 
   const chatPartnerIds = users.filter((id) => id !== userId);
@@ -73,14 +73,21 @@ const page = async ({ params }: pageProps) => {
           <div className="relative flex items-center space-x-4">
             <div className="relative">
               <div className="relative w-8 sm:w-12 h-8 sm:h-12">
-                <Image
-                  fill
-                  referrerPolicy="no-referrer"
-                  src={chatPartner.image}
-                  alt={`${chatPartner.name}'s profile picture`}
-                  className="rounded-full"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
-                />
+                {!chatPartner ||
+                !chatPartner.image ||
+                chatPartner.image === "" ||
+                chatPartner.image === undefined ? (
+                  <User className="h-8 w-8 sm:h-12 sm:w-12" />
+                ) : (
+                  <Image
+                    fill
+                    referrerPolicy="no-referrer"
+                    src={chatPartner.image}
+                    alt={`${chatPartner.name}'s profile picture`}
+                    className="rounded-full"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
+                  />
+                )}
               </div>
             </div>
 

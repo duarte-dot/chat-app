@@ -11,13 +11,15 @@ interface Chat {
 }
 
 interface GroupChat {
-  groupId: string;
-  groupName: string;
+  id: string;
+  name: string;
   members: string[];
 }
 
 interface Message {
   id: string;
+  chatId: string;
+  chatName: string;
   senderId: string;
   receiverId: string;
   text: string;
@@ -27,7 +29,7 @@ interface Message {
 interface GroupMessage {
   id: string;
   senderId: string;
-  groupId: string;
+  id: string;
   text: string;
   timestamp: number;
 }

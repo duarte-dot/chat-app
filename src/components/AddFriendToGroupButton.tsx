@@ -3,8 +3,10 @@
 import { FC, useState } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import axios from "axios";
-import { nanoid } from "nanoid";
+import axios, { AxiosError } from "axios";
+import { chatHrefConstructor } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { z } from "zod";
 
 interface User {
   id: string;
@@ -15,56 +17,80 @@ interface User {
 
 interface AddFriendToGroupButtonProps {
   friends: User[];
+  sessionId: string;
 }
 
 const AddFriendToGroupButton: FC<AddFriendToGroupButtonProps> = ({
   friends,
+  sessionId,
 }) => {
   const [selectedFriends, setSelectedFriends] = useState<User[]>([]);
-  const [groupName, setGroupName] = useState("");
+  const [name, setName] = useState("");
 
   const toggleFriendSelection = (friend: User) => {
-    setSelectedFriends((prevSelectedFriends) => {
-      if (prevSelectedFriends.includes(friend)) {
-        return prevSelectedFriends.filter(
+    if (selectedFriends.includes(friend)) {
+      setSelectedFriends((prevSelectedFriends) =>
+        prevSelectedFriends.filter(
           (selectedFriend) => selectedFriend !== friend
-        );
-      } else {
-        return [...prevSelectedFriends, friend];
-      }
-    });
+        )
+      );
+    } else {
+      setSelectedFriends((prevSelectedFriends) => [
+        ...prevSelectedFriends,
+        friend,
+      ]);
+    }
   };
 
+  const userIds = [sessionId, ...selectedFriends.map((friend) => friend.id)];
+  const userIdsString = userIds.join("");
+
   const createGroup = async () => {
-    await axios.post("/api/groups/create", {
-      groupId: nanoid(),
-      groupName: groupName,
-      userIdsToAdd: selectedFriends.map((friend) => friend.id),
-    });
+    try {
+      await axios.post("/api/groups/create", {
+        id: chatHrefConstructor(userIdsString),
+        name: name,
+        userIdsToAdd: selectedFriends.map((friend) => friend.id),
+      });
+
+      setSelectedFriends([]);
+      setName("");
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        toast.error(e.response?.data);
+
+        setSelectedFriends([]);
+        setName("");
+
+        return;
+      }
+    }
   };
 
   return (
     <main className="pt-8">
-      <h1 className="font-bold text-5xl mb-8">Invite friends</h1>
+      <h1 className="font-bold text-3xl mb-8">Invite friends</h1>
       <div className="flex flex-col gap-4">
         <input
           type="text"
           placeholder="Group name"
-          className="border border-gray-200 rounded-md p-2"
-          onChange={(e) => setGroupName(e.target.value)}
+          className="border border-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-900 focus:border-transparent"
+          onChange={(e) => setName(e.target.value)}
         />
         {friends.map((friend: User) => (
-          <div className="flex items-center gap-4" key={friend.id}>
-            <input
-              type="checkbox"
-              checked={selectedFriends.includes(friend)}
-              onChange={() => toggleFriendSelection(friend)}
-            />
+          <div
+            className={`flex items-center gap-4 ${
+              selectedFriends.includes(friend)
+                ? "bg-purple-900 text-white rounded-md p-2 cursor-pointer"
+                : "cursor-pointer hover:bg-gray-200 transition-colors rounded-md p-2"
+            }`}
+            key={friend.id}
+            onClick={() => toggleFriendSelection(friend)}
+          >
             <div className="relative h-8 w-8 bg-gray-50">
               <Image
                 fill
                 referrerPolicy="no-referrer"
-                className="rounded-full"
                 src={friend.image || ""}
                 alt="Your profile picture"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
