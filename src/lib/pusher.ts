@@ -10,7 +10,7 @@ export const pusherServer = new PusherServer({
 });
 
 export const pusherClient = new PusherClient(
-  97b95e67f3886a18c6a4,
+  process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
   {
     cluster: "sa1"!,
   }
