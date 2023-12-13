@@ -15,19 +15,29 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const [canSendMessage, setCanSendMessage] = useState<boolean>(true);
+  const [isInputDisabled, setIsInputDisabled] = useState<boolean>(false);
 
   const sendMessage = async () => {
-    if (!input) return;
+    if (!input || !canSendMessage) return;
     setIsLoading(true);
+
+    setIsInputDisabled(true);
 
     try {
       await axios.post("/api/message/send", { text: input, chatId });
       setInput("");
       textareaRef.current?.focus();
+      setCanSendMessage(false);
+      setTimeout(() => {
+        setCanSendMessage(true);
+      }, 3000);
     } catch (e) {
       toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
+
+      setIsInputDisabled(false);
     }
   };
 
@@ -43,6 +53,7 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
             }
           }}
           rows={1}
+          disabled={isInputDisabled}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`...`}
