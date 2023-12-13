@@ -13,18 +13,36 @@ O Chat App permite que você se comunique sem esforço, compartilhando ideias e 
 - **Compartilhamento de Ideias:** Compartilhe e discuta ideias com facilidade.
 - **Tecnologias Modernas:** Construído com as últimas tecnologias para desempenho otimizado.
 
+## Problemas com Erro 404?
+
+Se, ao acessar o Chat App, você se deparar com o erro 404, não se preocupe! Isso pode ser facilmente resolvido limpando os cookies do seu navegador. Siga as etapas abaixo para corrigir o problema:
+
+1. **Limpe os Cookies 🍪:**
+
+   - Acesse as configurações do seu navegador.
+   - Procure a seção de privacidade ou configurações avançadas.
+   - Encontre a opção para limpar cookies ou dados de navegação.
+   - Selecione essa opção e confirme a limpeza dos cookies.
+
+2. **Recarregue a Página:**
+   - Após limpar os cookies, recarregue a página do Chat App.
+
+Isso geralmente resolverá o problema do erro 404 e permitirá que você acesse o aplicativo normalmente. Se o problema persistir, sinta-se à vontade para abrir uma issue ou entrar em contato para obter suporte. Caso não resolva, tente o acesso por uma aba anônima 👤
+
+Agradecemos por sua compreensão e paciência! 🛠️
+
 ## Dependências
 
 Aqui estão algumas das principais dependências usadas neste projeto:
 
-- **@headlessui/react:** Componentes de interface para React sem estilos.
+- **next:** Framework React para construir aplicações web.
+- **typescript:** Superset tipado do JavaScript.
 - **@upstash-redis:** Ferramenta de controle de banco de dados.
 - **@tailwindcss:** Estilização de CSS.
 - **axios:** Cliente HTTP para fazer requisições.
-- **next:** Framework React para construir aplicações web.
 - **react:** Biblioteca JavaScript para construir interfaces de usuário.
-- **typescript:** Superset tipado do JavaScript.
 - **zod:** Declaração e validação de esquemas com foco em TypeScript.
+- **@headlessui/react:** Componentes de interface para React sem estilos.
 
 Certifique-se de verificar o arquivo `package.json` para obter a lista completa de dependências e suas versão.
 
@@ -51,20 +69,22 @@ GOOGLE_CLIENT_ID=seu_id <br>
 GOOGLE_CLIENT_SECRET=seu_secret
 
 ### c. Configuração do JWT:
+
 <b>Preencha a variável no arquivo .env com uma string secreta para assinar os tokens JWT: <b> <br>
 JWT_SECRET=secret
 
 ### d. Configuração do NextAuth:
+
 <b>Preencha as variáveis no arquivo .env com a URL do seu aplicativo e uma string secreta para NextAuth: <b> <br>
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000 <br>
 NEXTAUTH_SECRET=secret
 
 ### e. Configuração do Pusher:
+
 <b>Crie uma conta no Pusher e obtenha as credenciais. Preencha as variáveis no arquivo .env: <b> <br>
 PUSHER_APP_ID=seu_pusher_id <br>
 NEXT_PUBLIC_PUSHER_APP_KEY=sua_chave_pusher <br>
 PUSHER_APP_SECRET=seu_pusher_secret
-
 
 ## 4. Execute o aplicativo com `npm run dev`.
 
