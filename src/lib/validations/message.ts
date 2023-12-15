@@ -4,6 +4,7 @@ export const messageValidator = z.object({
   id: z.string(),
   chatId: z.string(),
   senderId: z.string(),
+  senderName: z.string(),
   text: z.string(),
   timestamp: z.number(),
 });

@@ -21,19 +21,11 @@ interface Message {
   chatId: string;
   chatName: string;
   senderId: string;
+  senderName: string;
   receiverId: string;
   text: string;
   timestamp: number;
 }
-
-interface GroupMessage {
-  id: string;
-  senderId: string;
-  id: string;
-  text: string;
-  timestamp: number;
-}
-
 interface FriendRequest {
   id: string;
   senderId: string;
