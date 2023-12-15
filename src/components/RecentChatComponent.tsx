@@ -99,7 +99,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
     return () => {
       pusherClient.unbind("new_message");
     };
-  }, [filteredFriends, filteredGroups, pusherClient, sessionId, pathname]);
+  }, [filteredFriends, filteredGroups, sessionId, pathname]);
 
   return (
     <>

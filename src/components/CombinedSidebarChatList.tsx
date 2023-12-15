@@ -125,7 +125,7 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
       pusherClient.unbind("new_friend", newFriendHandler);
       pusherClient.unbind("new_group", newGroupHandler);
     };
-  }, [pathname, sessionId, router, unseenMessagesCount]);
+  }, [pathname, sessionId, router, unseenMessagesCount, groupChats]);
 
   useEffect(() => {
     const storedUnseenMessagesCount = localStorage.getItem(
