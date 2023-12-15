@@ -37,9 +37,29 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
     initialFilteredGroups || []
   );
   const pathname = usePathname();
+  const isLocalStorageAvailable =
+    typeof window !== "undefined" && window.localStorage;
+
+  const handleChatClick = (chatId: string) => {
+    if (!isLocalStorageAvailable) return;
+
+    const storedUnseenMessagesCount = localStorage.getItem(
+      "unseenMessagesCount"
+    );
+
+    if (storedUnseenMessagesCount) {
+      const parsedUnseenMessagesCount = JSON.parse(storedUnseenMessagesCount);
+      parsedUnseenMessagesCount[chatId] = 0;
+      localStorage.setItem(
+        "unseenMessagesCount",
+        JSON.stringify(parsedUnseenMessagesCount)
+      );
+    }
+  };
 
   useEffect(() => {
     pusherClient.bind("new_message", async function (data: any) {
+      console.log(data);
       if (data.chatId.length <= 74) {
         const existingFriendIndex = filteredFriends.findIndex(
           (friend) => friend.id === data.senderId
@@ -68,7 +88,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
         }
       } else {
         const existingGroupIndex = filteredGroups.findIndex(
-          (group) => group.id === data.senderId
+          (group) => group.id === data.chatId
         );
 
         if (existingGroupIndex !== -1) {
@@ -84,7 +104,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
           setFilteredGroups((prevGroups: ExtendedGroup[]) => [
             ...prevGroups,
             {
-              id: data.senderId,
+              id: data.chatId,
               name: data.senderName,
               groupName: data.groupName,
               members: data.chatMembers,
@@ -112,7 +132,10 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
             <ChevronRight className="h-7 w-7 text-zinc-400" />
           </div>
 
-          <Link
+          <a
+            onClick={() =>
+              handleChatClick(chatHrefConstructor(sessionId + friend?.id) || "")
+            }
             href={`/dashboard/chat/${chatHrefConstructor(
               `${sessionId + friend?.id}`
             )}`}
@@ -147,7 +170,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
                 {friend?.lastMessage ? friend.lastMessage.text : ""}
               </p>
             </div>
-          </Link>
+          </a>
         </div>
       ))}
       {filteredGroups?.map((group) => (
@@ -159,7 +182,8 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
             <ChevronRight className="h-7 w-7 text-zinc-400" />
           </div>
 
-          <Link
+          <a
+            onClick={() => handleChatClick(group?.id || "")}
             href={`/dashboard/group-chat/${group?.id}`}
             className="relative sm:flex"
           >
@@ -194,7 +218,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
                 {group?.lastMessage ? group.lastMessage.text : ""}
               </p>
             </div>
-          </Link>
+          </a>
         </div>
       ))}
     </>
