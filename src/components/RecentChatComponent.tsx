@@ -189,7 +189,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
                   {group?.lastMessage &&
                   group.lastMessage.senderId === sessionId
                     ? "You: "
-                    : ""}
+                    : `${group.lastMessage?.senderName}: `}
                 </span>
                 {group?.lastMessage ? group.lastMessage.text : ""}
               </p>
