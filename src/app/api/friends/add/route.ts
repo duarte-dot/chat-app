@@ -10,22 +10,21 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const { email: emailToAdd } = addFriendValidator.parse(body.email);
+
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.id === "") {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
+    }
 
     const idToAdd = (await fetchRedis(
       "get",
       `user:email:${emailToAdd}`
     )) as string;
-
     if (!idToAdd) {
       return new Response("This person does not exist.", { status: 404 });
-    }
-
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new Response("Unauthorized.", { status: 401 });
     }
 
     if (idToAdd === session.user.id) {
@@ -37,7 +36,6 @@ export async function POST(req: Request) {
       `user:${idToAdd}:incoming_friend_requests`,
       session.user.id
     )) as 0 | 1;
-
     if (isAlreadyAdded) {
       return new Response("You have already added this person.", {
         status: 400,
@@ -49,23 +47,23 @@ export async function POST(req: Request) {
       `user:${idToAdd}:friends`,
       session.user.id
     )) as 0 | 1;
-
     if (isAlreadyFriend) {
       return new Response("You are already friends with this person.", {
         status: 400,
       });
     }
 
-    await pusherServer.trigger(
-      pusherKeyFormatter(`user:${idToAdd}:incoming_friend_requests`),
-      "incoming_friend_requests",
-      {
-        senderId: session.user.id,
-        senderEmail: session.user.email,
-      }
-    );
-
-    db.sadd(`user:${idToAdd}:incoming_friend_requests`, session.user.id);
+    await Promise.all([
+      pusherServer.trigger(
+        pusherKeyFormatter(`user:${idToAdd}:incoming_friend_requests`),
+        "incoming_friend_requests",
+        {
+          senderId: session.user.id,
+          senderEmail: session.user.email,
+        }
+      ),
+      db.sadd(`user:${idToAdd}:incoming_friend_requests`, session.user.id),
+    ]);
 
     return new Response("Friend request sent.", { status: 200 });
   } catch (error) {

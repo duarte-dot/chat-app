@@ -9,13 +9,13 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const { id: idToAdd } = z.object({ id: z.string() }).parse(body);
 
     const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new Response("Unauthorized", { status: 401 });
+    if (!session || session.user.id === "") {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
     }
 
     const isAlreadyFriends = (await fetchRedis(
@@ -23,7 +23,6 @@ export async function POST(req: Request) {
       `user:${session.user.id}:friends`,
       idToAdd
     )) as 0 | 1;
-
     if (isAlreadyFriends) {
       return new Response("You are already friends with this person.", {
         status: 400,
@@ -35,7 +34,6 @@ export async function POST(req: Request) {
       `user:${session.user.id}:incoming_friend_requests`,
       idToAdd
     )) as 0 | 1;
-
     if (!hasFriendRequest) {
       return new Response(
         "You have not received a friend request from this person.",
@@ -49,17 +47,16 @@ export async function POST(req: Request) {
       fetchRedis("get", `user:${session.user.id}`),
       fetchRedis("get", `user:${idToAdd}`),
     ])) as [string, string];
-
     const user = JSON.parse(rawUser) as User;
     const friend = JSON.parse(rawFriend) as User;
 
     await Promise.all([
-      await pusherServer.trigger(
+      pusherServer.trigger(
         pusherKeyFormatter(`user:${idToAdd}:friends`),
         "new_friend",
         user
       ),
-      await pusherServer.trigger(
+      pusherServer.trigger(
         pusherKeyFormatter(`user:${session.user.id}:friends`),
         "new_friend",
         friend

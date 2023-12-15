@@ -6,13 +6,14 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
     const { id: idToDeny } = z.object({ id: z.string() }).parse(body);
+
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.id === "") {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
+    }
 
     await db.srem(`user:${session.user.id}:incoming_friend_requests`, idToDeny);
 

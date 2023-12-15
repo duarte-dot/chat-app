@@ -7,18 +7,33 @@ import { Message, messageValidator } from "@/lib/validations/message";
 import { nanoid } from "nanoid";
 import { getServerSession } from "next-auth";
 
+async function getGroupName(chatId: string): Promise<string | undefined> {
+  if (chatId.includes("--")) {
+    const group = (await fetchRedis("smembers", `group:${chatId}`)) as string;
+
+    const groupParsed = JSON.parse(group) as GroupChat;
+    return groupParsed.name;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const { text, chatId }: { text: string; chatId: string } = await req.json();
 
     const session = await getServerSession(authOptions);
-    if (!session) return new Response("Unauthorized", { status: 401 });
+    if (!session || session.user.id === "") {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
+    }
 
     const userId = session.user.id;
     const userIds = chatId.split("--");
 
-    if (!userIds.includes(userId) && chatId.length === 74) {
-      return new Response("Unauthorized", { status: 401 });
+    if (!userIds.includes(userId)) {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
     }
 
     const friendList = (await fetchRedis(
@@ -29,9 +44,10 @@ export async function POST(req: Request) {
     const areFriends = userIds.every(
       (id) => friendList.includes(id) || id === userId
     );
-
-    if (!areFriends && chatId.length === 74) {
-      return new Response("Unauthorized", { status: 401 });
+    if (!areFriends && userIds.length === 2) {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
     }
 
     const rawSender = (await fetchRedis("get", `user:${userId}`)) as string;
@@ -42,6 +58,7 @@ export async function POST(req: Request) {
     const messageData: Message = {
       id: nanoid(),
       chatId: chatId,
+      senderName: sender.name,
       senderId: userId,
       text,
       timestamp,
@@ -51,44 +68,35 @@ export async function POST(req: Request) {
 
     const redisKeyPrefix = userIds.length > 2 ? "group-chat" : "chat";
 
-    await pusherServer.trigger(
-      pusherKeyFormatter(`${redisKeyPrefix}:${chatId}`),
-      "incoming-message",
-      message
-    );
+    const grpName = await getGroupName(chatId);
 
-    let grpName = "www";
+    await Promise.all([
+      pusherServer.trigger(
+        pusherKeyFormatter(`${redisKeyPrefix}:${chatId}`),
+        "incoming-message",
+        message
+      ),
 
-    if (messageData.chatId.length > 74) {
-      const group = (await fetchRedis(
-        "smembers",
-        `group:${message.chatId}`
-      )) as string;
-
-      const groupParsed = JSON.parse(group) as GroupChat;
-
-      grpName = groupParsed.name;
-    }
-
-    userIds.forEach(async (friendId) => {
-      await pusherServer.trigger(
-        pusherKeyFormatter(`user:${friendId}:chats`),
-        "new_message",
-        {
-          ...message,
-          senderImg: sender.image,
-          groupName: message.chatId.length > 74 ? grpName : sender.name,
-          senderName: sender.name,
-          senderId: sender.id,
-          senderEmail: sender.email,
-        }
-      );
-    });
-
-    await db.zadd(`${redisKeyPrefix}:${chatId}:messages`, {
-      score: timestamp,
-      member: JSON.stringify(message),
-    });
+      ...userIds.map(async (friendId) => {
+        await pusherServer.trigger(
+          pusherKeyFormatter(`user:${friendId}:chats`),
+          "new_message",
+          {
+            ...message,
+            senderImg: sender.image,
+            groupName: userIds.length > 2 ? grpName : sender.name,
+            name: sender.name,
+            senderId: sender.id,
+            senderName: sender.name,
+            senderEmail: sender.email,
+          }
+        );
+      }),
+      db.zadd(`${redisKeyPrefix}:${chatId}:messages`, {
+        score: timestamp,
+        member: JSON.stringify(message),
+      }),
+    ]);
 
     return new Response("OK");
   } catch (error) {

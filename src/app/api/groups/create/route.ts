@@ -9,7 +9,6 @@ import { string, z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const { id, userIdsToAdd, name } = z
       .object({
         id: z.string(),
@@ -19,17 +18,19 @@ export async function POST(req: Request) {
       .parse(body);
 
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return new Response("Unauthorized", { status: 401 });
+    if (!session || session.user.id === "") {
+      return new Response("Unauthorized. Please sign in again!", {
+        status: 401,
+      });
     }
 
-    const userIdsToAddAndName = {
-      id: id,
-      name: name,
+    const userIdsAndName = {
+      id,
+      name,
       members: [session.user.id, ...userIdsToAdd],
     };
 
-    if (userIdsToAddAndName.members.length <= 2) {
+    if (userIdsAndName.members.length <= 2) {
       return new Response("A group must have at least three members.", {
         status: 422,
       });
@@ -40,7 +41,6 @@ export async function POST(req: Request) {
     }
 
     const existingGroup = await fetchRedis("smembers", `group:${id}`);
-
     if (existingGroup.length > 0) {
       return new Response("This group already exists.", { status: 400 });
     }
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       pusherServer.trigger(
         pusherKeyFormatter(`user:${session.user.id}:groups`),
         "new_group",
-        userIdsToAddAndName
+        userIdsAndName
       ),
 
       db.sadd(`user:${session.user.id}:groups`, id),
@@ -57,13 +57,13 @@ export async function POST(req: Request) {
         await pusherServer.trigger(
           pusherKeyFormatter(`user:${userIdToAdd}:groups`),
           "new_group",
-          userIdsToAddAndName
+          userIdsAndName
         );
 
         db.sadd(`user:${userIdToAdd}:groups`, id);
       }),
 
-      db.sadd(`group:${id}`, JSON.stringify(userIdsToAddAndName)),
+      db.sadd(`group:${id}`, JSON.stringify(userIdsAndName)),
     ]);
 
     return new Response("Group created successfully.", { status: 200 });
