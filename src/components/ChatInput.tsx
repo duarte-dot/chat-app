@@ -17,9 +17,15 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
   const [input, setInput] = useState<string>("");
   const [canSendMessage, setCanSendMessage] = useState<boolean>(true);
   const [isInputDisabled, setIsInputDisabled] = useState<boolean>(false);
+  const [messageCount, setMessageCount] = useState<number>(0);
 
   const sendMessage = async () => {
-    if (!input || !canSendMessage) return;
+    if (!input || !canSendMessage) {
+      toast("Please wait before sending another message.", {
+        icon: "🕒",
+      });
+      return;
+    }
     setIsLoading(true);
 
     setIsInputDisabled(true);
@@ -28,15 +34,18 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
       await axios.post("/api/message/send", { text: input, chatId });
       setInput("");
       textareaRef.current?.focus();
-      setCanSendMessage(false);
-      setTimeout(() => {
-        setCanSendMessage(true);
-      }, 3000);
+      setMessageCount((prevCount) => prevCount + 1);
+      if (messageCount >= 2) {
+        setCanSendMessage(false);
+        setTimeout(() => {
+          setCanSendMessage(true);
+          setMessageCount(0);
+        }, 3000);
+      }
     } catch (e) {
       toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
-
       setIsInputDisabled(false);
     }
   };
