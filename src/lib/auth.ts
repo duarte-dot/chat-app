@@ -25,8 +25,8 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: getGoogleCredentials().clientId!,
+      clientSecret: getGoogleCredentials().clientSecret!,
       authorization: {
         params: {
           prompt: "consent",
@@ -42,9 +42,26 @@ export const authOptions: NextAuthOptions = {
         | string
         | null;
 
+      const oneDay = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
+
       if (!dbUser) {
-        token.id = user!.id;
-        return token;
+        if (!user) {
+          return {
+            id: "",
+            name: token.name,
+            email: token.email,
+            picture: token.picture,
+            exp: oneDay,
+          };
+        } else {
+          token.id = user!.id;
+          token.name = user!.name;
+          token.email = user!.email;
+          token.picture = user!.image;
+          token.exp = oneDay;
+
+          return token;
+        }
       }
 
       const dbUserParse = JSON.parse(dbUser);
@@ -54,6 +71,7 @@ export const authOptions: NextAuthOptions = {
         name: dbUserParse.name,
         email: dbUserParse.email,
         picture: dbUserParse.image,
+        exp: oneDay,
       };
     },
     async session({ session, token }) {
@@ -62,6 +80,8 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
+
+        return session;
       }
 
       return session;
