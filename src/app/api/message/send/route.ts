@@ -68,7 +68,11 @@ export async function POST(req: Request) {
 
     const redisKeyPrefix = userIds.length > 2 ? "group-chat" : "chat";
 
-    const grpName = await getGroupName(chatId);
+    let grpName: string | undefined = undefined;
+
+    if (userIds.length > 2) {
+      grpName = await getGroupName(chatId);
+    }
 
     await Promise.all([
       pusherServer.trigger(
@@ -100,6 +104,7 @@ export async function POST(req: Request) {
 
     return new Response("OK");
   } catch (error) {
+    console.log(error);
     if (error instanceof Error) {
       return new Response(error.message, { status: 500 });
     }
