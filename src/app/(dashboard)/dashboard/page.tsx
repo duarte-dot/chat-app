@@ -69,9 +69,7 @@ const page = async ({}) => {
       <div className="container py-12">
         <h1 className="font-bold text-5xl mb-8">Recent chats</h1>
         {filteredFriends.length === 0 && filteredGroups.length === 0 ? (
-          <div className="text-center text-gray-500">
-            Nothing to show here...
-          </div>
+          <div className="text-gray-500">Nothing to show here...</div>
         ) : (
           <RecentChatComponent
             sessionId={session.user.id}
