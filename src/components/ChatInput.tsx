@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
 import Button from "./ui/Button";
@@ -19,6 +19,12 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
   const [isInputDisabled, setIsInputDisabled] = useState<boolean>(false);
   const [messageCount, setMessageCount] = useState<number>(0);
 
+  useEffect(() => {
+    if (textareaRef.current && !isInputDisabled) {
+      textareaRef.current.focus();
+    }
+  }, [isInputDisabled]);
+
   const sendMessage = async () => {
     if (!input || !canSendMessage) {
       toast("Please wait before sending another message.", {
@@ -33,8 +39,12 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
     try {
       await axios.post("/api/message/send", { text: input, chatId });
       setInput("");
-      textareaRef.current?.focus();
       setMessageCount((prevCount) => prevCount + 1);
+      
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+
       if (messageCount >= 2) {
         setCanSendMessage(false);
         setTimeout(() => {
@@ -55,6 +65,7 @@ const ChatInput: FC<ChatInputProps> = ({ chatPartners, chatId }) => {
       <div className="relative flex-1 overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
         <TextareaAutosize
           ref={textareaRef}
+          autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
