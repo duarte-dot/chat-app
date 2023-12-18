@@ -59,7 +59,6 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
 
   useEffect(() => {
     pusherClient.bind("new_message", async function (data: any) {
-      console.log(data);
       if (data.chatId.length <= 74) {
         const existingFriendIndex = filteredFriends.findIndex(
           (friend) => friend.id === data.senderId
