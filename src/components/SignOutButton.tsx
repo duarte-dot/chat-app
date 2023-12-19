@@ -14,6 +14,7 @@ const SignOutButton: FC<SignOutButtonProps> = ({ ...props }) => {
     <Button
       {...props}
       variant="ghost"
+      size="lg"
       onClick={async () => {
         setIsSigningOut(true);
         try {
