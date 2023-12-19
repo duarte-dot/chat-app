@@ -64,8 +64,8 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
 
   useEffect(() => {
     const combinedChats = [
-      ...(initialFilteredFriends || []),
-      ...(initialFilteredGroups || []),
+      ...(filteredFriends || []),
+      ...(filteredGroups || []),
     ];
     const sortedChats = combinedChats.sort((a, b) => {
       const aTimestamp = a.lastMessage?.timestamp || 0;
@@ -73,7 +73,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
       return bTimestamp - aTimestamp;
     });
     setFilteredChats(sortedChats);
-  }, [initialFilteredFriends, initialFilteredGroups]);
+  }, [filteredFriends, filteredGroups]);
 
   useEffect(() => {
     pusherClient.bind("new_message", async function (data: any) {
@@ -139,6 +139,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
   }, [filteredFriends, filteredGroups, sessionId, pathname]);
 
   return (
+    console.log(filteredChats),
     <>
       {filteredChats?.map((chat) => (
         <div
