@@ -10,8 +10,8 @@ import Link from "next/link";
 
 interface CombinedSidebarChatListProps {
   sessionId: string;
-  friends?: User[];
-  groups?: GroupChat[];
+  friends?: ExtendedUser[];
+  groups?: ExtendedGroup[];
 }
 
 interface ExtendedMessage extends Message {
@@ -21,12 +21,12 @@ interface ExtendedMessage extends Message {
 }
 
 interface ExtendedUser extends User {
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
   lastMessage?: ExtendedMessage | null;
 }
 
 interface ExtendedGroup extends GroupChat {
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
   lastMessage?: ExtendedMessage | null;
 }
 
@@ -62,8 +62,6 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
 
   const router = useRouter();
   const pathname = usePathname();
-  const [activeChats, setActiveChats] = useState<User[]>(friends || []);
-  const [groupChats, setGroupChats] = useState<GroupChat[]>(groups || []);
   const [unseenMessagesCount, setUnseenMessagesCount] = useState<{
     [key: string]: number;
   }>(() => {
@@ -76,36 +74,34 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
       ? JSON.parse(storedUnseenMessagesCount)
       : {};
   });
-
+  const [friendChats, setFriendChats] = useState<ExtendedUser[]>(friends || []);
+  const [groupChats, setGroupChats] = useState<ExtendedGroup[]>(groups || []);
   const [chats, setChats] = useState<(ExtendedUser | ExtendedGroup)[]>([]);
-  const [sortedChats, setSortedChats] = useState<
-    (ExtendedUser | ExtendedGroup)[]
-  >([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedSortedChats = localStorage.getItem("sortedChats");
-    if (storedSortedChats) {
-      setSortedChats(JSON.parse(storedSortedChats));
-    }
-  }, []);
-
-  useEffect(() => {
-    setChats([
-      ...activeChats.map((userChat) => ({ ...userChat, isGroupChat: false })),
-      ...groupChats.map((groupChat) => ({ ...groupChat, isGroupChat: true })),
-    ]);
-  }, [activeChats, groupChats]);
+    setChats(
+      [
+        ...friendChats.map((userChat) => ({ ...userChat, isGroupChat: false })),
+        ...groupChats.map((groupChat) => ({ ...groupChat, isGroupChat: true })),
+      ].sort((a, b) => {
+        const lastMessageA = a.lastMessage?.timestamp || 0;
+        const lastMessageB = b.lastMessage?.timestamp || 0;
+        return lastMessageB - lastMessageA;
+      })
+    );
+  }, [friendChats, groupChats]);
 
   useEffect(() => {
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:chats`));
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:friends`));
     pusherClient.subscribe(pusherKeyFormatter(`user:${sessionId}:groups`));
 
-    const newFriendHandler = (newFriend: User) => {
-      setActiveChats((prev) => [...prev, newFriend]);
+    const newFriendHandler = (newFriend: ExtendedUser) => {
+      setFriendChats((prev) => [...prev, newFriend]);
     };
 
-    const newGroupHandler = (newGroup: GroupChat) => {
+    const newGroupHandler = (newGroup: ExtendedGroup) => {
       setGroupChats((prev) => [...prev, newGroup]);
     };
 
@@ -128,36 +124,14 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
               ...updatedChats[existingChatIndex],
               lastMessage: message,
             };
-            // Move the chat to the top by removing and reinserting
+
             updatedChats.splice(existingChatIndex, 1);
             updatedChats.unshift(updatedChat);
-
-            // armazena no localstorage o chat atualizado
-            if (isLocalStorageAvailable) {
-              localStorage.setItem(
-                "sortedChats",
-                JSON.stringify([...updatedChats])
-              );
-            }
-
-            setSortedChats(updatedChats);
 
             return updatedChats;
           });
         } else {
           setChats((prevChats) => [
-            {
-              id: message.senderId,
-              name: message.senderName,
-              email: message.senderEmail,
-              image: message.senderImg,
-              lastMessage: message,
-              isGroupChat: message.chatId.length > 74,
-            },
-            ...prevChats,
-          ]);
-
-          setSortedChats((prevChats) => [
             {
               id: message.senderId,
               name: message.senderName,
@@ -209,15 +183,6 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
           updatedChats.splice(existingChatIndex, 1);
           updatedChats.unshift(updatedChat);
 
-          if (isLocalStorageAvailable) {
-            localStorage.setItem(
-              "sortedChats",
-              JSON.stringify([...updatedChats])
-            );
-          }
-
-          setSortedChats(updatedChats);
-
           return updatedChats;
         });
       } else {
@@ -232,20 +197,10 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
           },
           ...prevChats,
         ]);
-
-        setSortedChats((prevChats) => [
-          {
-            id: message.senderId,
-            name: message.senderName,
-            email: message.senderEmail,
-            image: message.senderImg,
-            lastMessage: message,
-            isGroupChat: message.chatId.length > 74,
-          },
-          ...prevChats,
-        ]);
       }
     };
+
+    setIsLoading(false);
 
     pusherClient.bind("new_message", chatHandler);
     pusherClient.bind("new_friend", newFriendHandler);
@@ -279,102 +234,59 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
   }, [unseenMessagesCount]);
 
   return (
-    <ul role="list" className="max-h-[12rem] overflow-y-scroll scrollbar-w-2 -mx-2 space-y-1">
-      {sortedChats.length !== 0
-        ? sortedChats.map((chat) => {
-            const chatId = chat.id;
+    <ul
+      role="list"
+      className="max-h-[12rem] overflow-y-scroll scrollbar-w-2 -mx-2 space-y-1"
+    >
+      {isLoading ? (
+        <li className="text-gray-500">...</li>
+      ) : (
+        chats.map((chat) => {
+          const chatId = chat.id;
 
-            return (
-              <li key={chatId}>
-                <Link
-                  href={`/dashboard/${
-                    chat.isGroupChat ? "group-chat" : "chat"
-                  }/${
-                    chat.isGroupChat
-                      ? chatId
-                      : chatHrefConstructor(chatId + sessionId)
-                  }`}
-                  className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex items-center gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                  {...(chat.isGroupChat
-                    ? {
-                        onClick: () => handleChatClick(chatId),
-                      }
-                    : {
-                        onClick: () =>
-                          handleChatClick(
+          return (
+            <li key={chatId}>
+              <Link
+                href={`/dashboard/${chat.isGroupChat ? "group-chat" : "chat"}/${
+                  chat.isGroupChat
+                    ? chatId
+                    : chatHrefConstructor(chatId + sessionId)
+                }`}
+                className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex items-center gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                {...(chat.isGroupChat
+                  ? {
+                      onClick: () => handleChatClick(chatId),
+                    }
+                  : {
+                      onClick: () =>
+                        handleChatClick(
+                          chatHrefConstructor(chatId + sessionId)
+                        ),
+                    })}
+              >
+                {chat.name}
+                {chat.isGroupChat
+                  ? unseenMessagesCount[chatId] > 0 && (
+                      <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
+                        {unseenMessagesCount[chatId]}
+                      </span>
+                    )
+                  : unseenMessagesCount[
+                      chatHrefConstructor(chatId + sessionId)
+                    ] > 0 && (
+                      <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
+                        {
+                          unseenMessagesCount[
                             chatHrefConstructor(chatId + sessionId)
-                          ),
-                      })}
-                >
-                  {chat.name}
-                  {chat.isGroupChat
-                    ? unseenMessagesCount[chatId] > 0 && (
-                        <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
-                          {unseenMessagesCount[chatId]}
-                        </span>
-                      )
-                    : unseenMessagesCount[
-                        chatHrefConstructor(chatId + sessionId)
-                      ] > 0 && (
-                        <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
-                          {
-                            unseenMessagesCount[
-                              chatHrefConstructor(chatId + sessionId)
-                            ]
-                          }
-                        </span>
-                      )}
-                </Link>
-              </li>
-            );
-          })
-        : chats.map((chat) => {
-            const chatId = chat.id;
-
-            return (
-              <li key={chatId}>
-                <Link
-                  href={`/dashboard/${
-                    chat.isGroupChat ? "group-chat" : "chat"
-                  }/${
-                    chat.isGroupChat
-                      ? chatId
-                      : chatHrefConstructor(chatId + sessionId)
-                  }`}
-                  className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex items-center gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                  {...(chat.isGroupChat
-                    ? {
-                        onClick: () => handleChatClick(chatId),
-                      }
-                    : {
-                        onClick: () =>
-                          handleChatClick(
-                            chatHrefConstructor(chatId + sessionId)
-                          ),
-                      })}
-                >
-                  {chat.name}
-                  {chat.isGroupChat
-                    ? unseenMessagesCount[chatId] > 0 && (
-                        <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
-                          {unseenMessagesCount[chatId]}
-                        </span>
-                      )
-                    : unseenMessagesCount[
-                        chatHrefConstructor(chatId + sessionId)
-                      ] > 0 && (
-                        <span className="bg-indigo-600 font-medium text-xs text-white w-4 h-4 rounded-full flex justify-center items-center">
-                          {
-                            unseenMessagesCount[
-                              chatHrefConstructor(chatId + sessionId)
-                            ]
-                          }
-                        </span>
-                      )}
-                </Link>
-              </li>
-            );
-          })}
+                          ]
+                        }
+                      </span>
+                    )}
+              </Link>
+            </li>
+          );
+        })
+      )}
     </ul>
   );
 };

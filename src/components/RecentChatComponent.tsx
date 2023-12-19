@@ -37,6 +37,11 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
   const [filteredGroups, setFilteredGroups] = useState(
     initialFilteredGroups || []
   );
+  const [filteredChats, setFilteredChats] = useState<
+    (ExtendedUser | ExtendedGroup)[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const pathname = usePathname();
   const isLocalStorageAvailable =
     typeof window !== "undefined" && window.localStorage;
@@ -58,10 +63,6 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
     }
   };
 
-  const [filteredChats, setFilteredChats] = useState<
-    (ExtendedUser | ExtendedGroup)[]
-  >([]);
-
   useEffect(() => {
     const combinedChats = [
       ...(filteredFriends || []),
@@ -72,6 +73,8 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
       const bTimestamp = b.lastMessage?.timestamp || 0;
       return bTimestamp - aTimestamp;
     });
+
+    setIsLoading(false);
     setFilteredChats(sortedChats);
   }, [filteredFriends, filteredGroups]);
 
@@ -139,59 +142,65 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
   }, [filteredFriends, filteredGroups, sessionId, pathname]);
 
   return (
-    console.log(filteredChats),
     <>
-      {filteredChats?.map((chat) => (
-        <div
-          key={chat?.id}
-          className="relative bg-zinc-50 border border-zinc-200 p-3 rounded-md mb-4 cursor-pointer hover:bg-zinc-100 transition-colors min-h-[80px]"
-        >
-          <div className="absolute right-4 inset-y-0 flex items-center">
-            <ChevronRight className="h-7 w-7 text-zinc-400" />
-          </div>
-
-          <a
-            onClick={() => handleChatClick(chat?.id || "")}
-            href={
-              chat?.id.length <= 74
-                ? `/dashboard/chat/${chatHrefConstructor(chat?.id + sessionId)}`
-                : `/dashboard/group-chat/${chat?.id}`
-            }
-            className="relative sm:flex"
+      {isLoading ? (
+        <div>...</div>
+      ) : (
+        filteredChats?.map((chat) => (
+          <div
+            key={chat?.id}
+            className="relative bg-zinc-50 border border-zinc-200 p-3 rounded-md mb-4 cursor-pointer hover:bg-zinc-100 transition-colors min-h-[80px]"
           >
-            <div className="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
-              <div className="relative h-6 w-6">
-                {chat?.image === undefined ? (
-                  <Users className="h-6 w-6" />
-                ) : (
-                  <Image
-                    referrerPolicy="no-referrer"
-                    className="rounded-full"
-                    alt={`${chat?.name}'s picture`}
-                    src={chat?.image || ""}
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
-                    fill
-                  />
-                )}
-              </div>
+            <div className="absolute right-4 inset-y-0 flex items-center">
+              <ChevronRight className="h-7 w-7 text-zinc-400" />
             </div>
 
-            <div>
-              <h4 className="text-lg font-semibold">
-                {chat?.groupName ? chat.groupName : chat.name}
-              </h4>
-              <p className="mt-1 max-w-md truncate">
-                <span className="text-zinc-400">
-                  {chat?.lastMessage && chat.lastMessage.senderId === sessionId
-                    ? "You: "
-                    : `${chat.lastMessage?.senderName}: `}
-                </span>
-                {chat?.lastMessage ? chat.lastMessage.text : ""}
-              </p>
-            </div>
-          </a>
-        </div>
-      ))}
+            <a
+              onClick={() => handleChatClick(chat?.id || "")}
+              href={
+                chat?.id.length <= 74
+                  ? `/dashboard/chat/${chatHrefConstructor(
+                      chat?.id + sessionId
+                    )}`
+                  : `/dashboard/group-chat/${chat?.id}`
+              }
+              className="relative sm:flex"
+            >
+              <div className="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
+                <div className="relative h-6 w-6">
+                  {chat?.image === undefined ? (
+                    <Users className="h-6 w-6" />
+                  ) : (
+                    <Image
+                      referrerPolicy="no-referrer"
+                      className="rounded-full"
+                      alt={`${chat?.name}'s picture`}
+                      src={chat?.image || ""}
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
+                      fill
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold">
+                  {chat?.groupName ? chat.groupName : chat.name}
+                </h4>
+                <p className="mt-1 max-w-md truncate">
+                  <span className="text-zinc-400">
+                    {chat?.lastMessage &&
+                    chat.lastMessage.senderId === sessionId
+                      ? "You: "
+                      : `${chat.lastMessage?.senderName}: `}
+                  </span>
+                  {chat?.lastMessage ? chat.lastMessage.text : ""}
+                </p>
+              </div>
+            </a>
+          </div>
+        ))
+      )}
     </>
   );
 };

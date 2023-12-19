@@ -14,6 +14,7 @@ import { SidebarOption } from "@/types/typings";
 import GroupSidebarOption from "@/components/GroupSidebarOption";
 import { getGroupsByUserId } from "@/helpers/get-groups-by-user-id";
 import CombinedSidebarChatList from "@/components/CombinedSidebarChatList";
+import { chatHrefConstructor } from "@/lib/utils";
 
 interface LayoutProps {
   children: ReactNode;
@@ -36,6 +37,48 @@ const Layout = async ({ children }: LayoutProps) => {
   const friends = await getFriendsByUserId(session.user.id);
   const groups = await getGroupsByUserId(session.user.id);
 
+  const friendsWithLastMessage = await Promise.all(
+    friends.map(async (friend) => {
+      const messages = await fetchRedis(
+        "zrange",
+        `chat:${chatHrefConstructor(
+          `${session.user.id + friend.id}`
+        )}:messages`,
+        -1,
+        -1
+      );
+
+      const lastMessageRaw = messages[0];
+
+      const lastMessage = lastMessageRaw ? JSON.parse(lastMessageRaw) : null;
+
+      return {
+        ...friend,
+        lastMessage,
+      };
+    })
+  );
+
+  const groupsWithLastMessage = await Promise.all(
+    groups.map(async (group) => {
+      const messages = await fetchRedis(
+        "zrange",
+        `group-chat:${group.id}:messages`,
+        -1,
+        -1
+      );
+
+      const lastMessageRaw = messages[0];
+
+      const lastMessage = lastMessageRaw ? JSON.parse(lastMessageRaw) : null;
+
+      return {
+        ...group,
+        lastMessage,
+      };
+    })
+  );
+
   const unseenRequestCount = (
     (await fetchRedis(
       "smembers",
@@ -47,8 +90,8 @@ const Layout = async ({ children }: LayoutProps) => {
     <div className="w-full flex h-screen">
       <div className="md:hidden">
         <MobileChatLayout
-          friends={friends}
-          groups={groups}
+          friends={friendsWithLastMessage}
+          groups={groupsWithLastMessage}
           session={session}
           sidebarOptions={sidebarOptions}
           unseenRequestCount={unseenRequestCount}
@@ -71,8 +114,8 @@ const Layout = async ({ children }: LayoutProps) => {
             <li>
               <CombinedSidebarChatList
                 sessionId={session.user.id}
-                friends={friends}
-                groups={groups}
+                friends={friendsWithLastMessage}
+                groups={groupsWithLastMessage}
               />
             </li>
 
