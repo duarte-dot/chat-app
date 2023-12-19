@@ -180,7 +180,7 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
               <h4 className="text-lg font-semibold">
                 {chat?.groupName ? chat.groupName : chat.name}
               </h4>
-              <p className="mt-1 max-w-md">
+              <p className="mt-1 max-w-md truncate">
                 <span className="text-zinc-400">
                   {chat?.lastMessage && chat.lastMessage.senderId === sessionId
                     ? "You: "
