@@ -11,6 +11,7 @@ import { FC, useEffect, useState } from "react";
 
 interface ExtendedUser extends User {
   lastMessage: Message | null;
+  groupName?: string;
 }
 
 interface ExtendedGroup extends GroupChat {
@@ -56,6 +57,23 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
       );
     }
   };
+
+  const [filteredChats, setFilteredChats] = useState<
+    (ExtendedUser | ExtendedGroup)[]
+  >([]);
+
+  useEffect(() => {
+    const combinedChats = [
+      ...(initialFilteredFriends || []),
+      ...(initialFilteredGroups || []),
+    ];
+    const sortedChats = combinedChats.sort((a, b) => {
+      const aTimestamp = a.lastMessage?.timestamp || 0;
+      const bTimestamp = b.lastMessage?.timestamp || 0;
+      return bTimestamp - aTimestamp;
+    });
+    setFilteredChats(sortedChats);
+  }, [initialFilteredFriends, initialFilteredGroups]);
 
   useEffect(() => {
     pusherClient.bind("new_message", async function (data: any) {
@@ -122,9 +140,9 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
 
   return (
     <>
-      {filteredFriends?.map((friend) => (
+      {filteredChats?.map((chat) => (
         <div
-          key={friend?.id}
+          key={chat?.id}
           className="relative bg-zinc-50 border border-zinc-200 p-3 rounded-md mb-4 cursor-pointer hover:bg-zinc-100 transition-colors min-h-[80px]"
         >
           <div className="absolute right-4 inset-y-0 flex items-center">
@@ -132,70 +150,24 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
           </div>
 
           <a
-            onClick={() =>
-              handleChatClick(chatHrefConstructor(sessionId + friend?.id) || "")
+            onClick={() => handleChatClick(chat?.id || "")}
+            href={
+              chat?.id.length <= 74
+                ? `/dashboard/chat/${chatHrefConstructor(chat?.id + sessionId)}`
+                : `/dashboard/group-chat/${chat?.id}`
             }
-            href={`/dashboard/chat/${chatHrefConstructor(
-              `${sessionId + friend?.id}`
-            )}`}
             className="relative sm:flex"
           >
             <div className="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
               <div className="relative h-6 w-6">
-                {friend?.image === "" ? (
+                {chat?.image === undefined ? (
                   <Users className="h-6 w-6" />
                 ) : (
                   <Image
                     referrerPolicy="no-referrer"
                     className="rounded-full"
-                    alt={`${friend?.name}'s picture`}
-                    src={friend?.image || ""}
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
-                    fill
-                  />
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold">{friend?.name}</h4>
-              <p className="mt-1 max-w-md">
-                <span className="text-zinc-400">
-                  {friend?.lastMessage &&
-                  friend.lastMessage.senderId === sessionId
-                    ? "You: "
-                    : ""}
-                </span>
-                {friend?.lastMessage ? friend.lastMessage.text : ""}
-              </p>
-            </div>
-          </a>
-        </div>
-      ))}
-      {filteredGroups?.map((group) => (
-        <div
-          key={group?.id}
-          className="relative bg-zinc-50 border border-zinc-200 p-3 rounded-md mb-4 cursor-pointer hover:bg-zinc-100 transition-colors min-h-[80px]"
-        >
-          <div className="absolute right-4 inset-y-0 flex items-center">
-            <ChevronRight className="h-7 w-7 text-zinc-400" />
-          </div>
-
-          <a
-            onClick={() => handleChatClick(group?.id || "")}
-            href={`/dashboard/group-chat/${group?.id}`}
-            className="relative sm:flex"
-          >
-            <div className="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
-              <div className="relative h-6 w-6">
-                {group?.image === undefined ? (
-                  <Users className="h-6 w-6" />
-                ) : (
-                  <Image
-                    referrerPolicy="no-referrer"
-                    className="rounded-full"
-                    alt={`${group?.name}'s picture`}
-                    src={group?.image || ""}
+                    alt={`${chat?.name}'s picture`}
+                    src={chat?.image || ""}
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 96vw, 600px"
                     fill
                   />
@@ -205,16 +177,15 @@ const RecentChatComponent: FC<RecentChatComponentProps> = ({
 
             <div>
               <h4 className="text-lg font-semibold">
-                {group?.groupName ? group.groupName : group.name}
+                {chat?.groupName ? chat.groupName : chat.name}
               </h4>
               <p className="mt-1 max-w-md">
                 <span className="text-zinc-400">
-                  {group?.lastMessage &&
-                  group.lastMessage.senderId === sessionId
+                  {chat?.lastMessage && chat.lastMessage.senderId === sessionId
                     ? "You: "
-                    : `${group.lastMessage?.senderName}: `}
+                    : `${chat.lastMessage?.senderName}: `}
                 </span>
-                {group?.lastMessage ? group.lastMessage.text : ""}
+                {chat?.lastMessage ? chat.lastMessage.text : ""}
               </p>
             </div>
           </a>
