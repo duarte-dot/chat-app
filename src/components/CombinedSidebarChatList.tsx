@@ -279,7 +279,7 @@ const CombinedSidebarChatList: FC<CombinedSidebarChatListProps> = ({
   }, [unseenMessagesCount]);
 
   return (
-    <ul role="list" className="max-h-[25rem] overflow-y-auto -mx-2 space-y-1">
+    <ul role="list" className="max-h-[12rem] overflow-y-scroll scrollbar-w-2 -mx-2 space-y-1">
       {sortedChats.length !== 0
         ? sortedChats.map((chat) => {
             const chatId = chat.id;

@@ -55,7 +55,7 @@ const Layout = async ({ children }: LayoutProps) => {
         />
       </div>
 
-      <div className="hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
+      <div className="hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto overflow-x-clip border-r border-gray-200 bg-white px-6">
         <a href="/dashboard" className="flex h-16 shrink-0 items-center">
           <Icons.Logo className="h-8 w-auto text-indigo-600"></Icons.Logo>
         </a>
@@ -66,7 +66,7 @@ const Layout = async ({ children }: LayoutProps) => {
           </div>
         )}
 
-        <nav className="flex flex-1 flex-col">
+        <nav className="flex flex-1 flex-col self-end">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <CombinedSidebarChatList
@@ -75,6 +75,7 @@ const Layout = async ({ children }: LayoutProps) => {
                 groups={groups}
               />
             </li>
+
             <li>
               <div className="text-xs font-semibold leading-6 text-gray-400">
                 Overview
@@ -144,7 +145,7 @@ const Layout = async ({ children }: LayoutProps) => {
         </nav>
       </div>
 
-      <aside className="max-h-screen container py-16 md:py-12 w-full">
+      <aside className="max-h-screen container py-16 md:py-0 w-full overflow-y-scroll scrollbar-w-2">
         {children}
       </aside>
     </div>
