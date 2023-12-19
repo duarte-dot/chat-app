@@ -64,7 +64,7 @@ const page = async ({ params }: pageProps) => {
   const initialMessages = await getChatMessages(users.join("--"));
 
   return (
-    <div className="flex-1 justify-between flex flex-col h-full max-h-[calc(100vh-6rem)]">
+    <div className="flex-1 justify-between flex flex-col h-full max-h-[calc(100vh-2rem)]">
       {chatPartners.map((chatPartner) => (
         <div
           key={chatPartner.id}
