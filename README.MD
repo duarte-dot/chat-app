@@ -1,114 +1,113 @@
 # Chat App
 
-Bem-vindo ao Chat App! Este aplicativo oferece uma plataforma intuitiva e sem complicações para conectar e se comunicar com amigos e colegas.
+Welcome to Chat App! This application provides an intuitive, hassle-free platform to connect and communicate with friends and colleagues.
 
-## Descrição
+## Description
 
-O Chat App permite que você se comunique sem esforço, compartilhando ideias e construindo conexões mais fortes. O aplicativo é criado com ❤️, combinando uma interface amigável com a potência das últimas tecnologias.
+Chat App allows you to communicate effortlessly, sharing ideas and building stronger connections. The app is crafted with ❤️, combining a user-friendly interface with the power of the latest technologies.
 
-## Principais Recursos
+## Key Features
 
-- **Comunicação Sem Esforço:** Conecte-se com outros e comunique-se de maneira fluida.
-- **Interface Intuitiva:** Design amigável para uma experiência de chat suave.
-- **Compartilhamento de Ideias:** Compartilhe e discuta ideias com facilidade.
-- **Tecnologias Modernas:** Construído com as últimas tecnologias para desempenho otimizado.
+- **Effortless Communication:** Connect with others and communicate seamlessly.
+- **Intuitive Interface:** User-friendly design for a smooth chatting experience.
+- **Idea Sharing:** Share and discuss ideas with ease.
+- **Modern Technologies:** Built with the latest technologies for optimized performance.
 
+## Dependencies
 
-## Dependências
+Here are some of the key dependencies used in this project:
 
-Aqui estão algumas das principais dependências usadas neste projeto:
+- **next:** React framework for building web applications.
+- **typescript:** Typed superset of JavaScript.
+- **@upstash-redis:** Redis database management tool.
+- **@tailwindcss:** CSS styling utility.
+- **axios:** HTTP client for making requests.
+- **react:** JavaScript library for building UI.
+- **zod:** TypeScript-first schema declaration and validation library.
+- **@headlessui/react:** UI components for React without styles.
 
-- **next:** Framework React para construir aplicações web.
-- **typescript:** Superset tipado do JavaScript.
-- **@upstash-redis:** Ferramenta de controle de banco de dados.
-- **@tailwindcss:** Estilização de CSS.
-- **axios:** Cliente HTTP para fazer requisições.
-- **react:** Biblioteca JavaScript para construir interfaces de usuário.
-- **zod:** Declaração e validação de esquemas com foco em TypeScript.
-- **@headlessui/react:** Componentes de interface para React sem estilos.
+Make sure to check the `package.json` file for a complete list of dependencies and their versions.
 
-Certifique-se de verificar o arquivo `package.json` para obter a lista completa de dependências e suas versão.
+# Getting Started
 
-# Como Começar
+To get started with Chat App, follow these steps:
 
-Para começar com o Chat App, siga estas etapas:
+## 1. Clone the repository.
 
-## 1. Clone o repositório.
+## 2. Install dependencies using `npm install`.
 
-## 2. Instale as dependências com `npm install`.
+## 3. Configure dependencies:
 
-## 3. Configure as dependências:
+### a. Upstash Redis Setup:
 
-### a. Configuração do Upstash Redis:
+Ensure you have an Upstash account and create a Redis database. Fill in the variables in the `.env` file:
+UPSTASH_REDIS_REST_URL=your_url
+UPSTASH_REDIS_REST_TOKEN=your_token
 
-<b>Certifique-se de que você tem uma conta no Upstash e crie um banco de dados Redis. Preencha as variáveis no arquivo .env:<b><br>
-UPSTASH_REDIS_REST_URL=sua_url <br>
-UPSTASH_REDIS_REST_TOKEN=seu_token
+### b. Google OAuth Setup:
 
-### b. Configuração do Google OAuth:
+Create a project on Google Developers Console, enable the Google+ API, and obtain your credentials. Fill in the variables in the `.env` file:
+GOOGLE_CLIENT_ID=your_id
+GOOGLE_CLIENT_SECRET=your_secret
 
-<b>Crie um projeto no Google Developers Console, ative a API do Google+ e obtenha suas credenciais. Preencha as variáveis no arquivo .env:<b><br>
-GOOGLE_CLIENT_ID=seu_id <br>
-GOOGLE_CLIENT_SECRET=seu_secret
+### c. JWT Setup:
 
-### c. Configuração do JWT:
-
-<b>Preencha a variável no arquivo .env com uma string secreta para assinar os tokens JWT: <b> <br>
+Fill in the variable in the `.env` file with a secret string to sign JWT tokens:
 JWT_SECRET=secret
 
-### d. Configuração do NextAuth:
+### d. NextAuth Setup:
 
-<b>Preencha as variáveis no arquivo .env com a URL do seu aplicativo e uma string secreta para NextAuth: <b> <br>
-NEXTAUTH_URL=http://localhost:3000 <br>
+Fill in the variables in the `.env` file with your application URL and a secret string for NextAuth:
+NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=secret
 
-### e. Configuração do Pusher:
+### e. Pusher Setup:
 
-<b>Crie uma conta no Pusher e obtenha as credenciais. Preencha as variáveis no arquivo .env: <b> <br>
-PUSHER_APP_ID=seu_pusher_id <br>
-NEXT_PUBLIC_PUSHER_APP_KEY=sua_chave_pusher <br>
-PUSHER_APP_SECRET=seu_pusher_secret
+Create an account on Pusher and obtain the credentials. Fill in the variables in the `.env` file:
+PUSHER_APP_ID=your_pusher_id
+NEXT_PUBLIC_PUSHER_APP_KEY=your_pusher_key
+PUSHER_APP_SECRET=your_pusher_secret
 
-## 4. Execute o aplicativo com `npm run dev`.
+## 4. Run the application using `npm run dev`.
 
-Sinta-se à vontade para explorar e personalizar o aplicativo de acordo com suas necessidades!
+Feel free to explore and customize the application according to your needs!
 
-# Escolhas tecnológicas feitas durante o desenvolvimento.
+# Technological Choices Made During Development
 
 ### Upstash (Redis)
 
-Utilizei o Upstash para armazenamento em cache e dados em tempo real. Sua facilidade de uso e integração eficiente tornam-no uma escolha ideal.
+I used Upstash for caching and real-time data storage. Its ease of use and efficient integration make it an ideal choice.
 
-### NextAuth com Google Provider
+### NextAuth with Google Provider
 
-NextAuth oferece uma solução simples e segura para autenticação social, enquanto a integração com o Google proporciona familiaridade aos usuários.
+NextAuth provides a simple and secure solution for social authentication, while integration with Google offers familiarity to users.
 
 ### Next.js
 
-Next.js, uma estrutura React, oferece SSR e pré-renderização estática para melhor desempenho e experiência do usuário.
+Next.js, a React framework, offers SSR and static pre-rendering for enhanced performance and user experience.
 
 ### Tailwind CSS
 
-Tailwind CSS simplifica a estilização com sua abordagem "utility-first", proporcionando flexibilidade e eficiência.
+Tailwind CSS simplifies styling with its utility-first approach, providing flexibility and efficiency.
 
 ### React Hook Form
 
-React Hook Form simplifica a gestão de formulários em React, tornando a validação e manipulação de dados mais eficientes.
+React Hook Form simplifies form management in React, making validation and data handling more efficient.
 
 ### Axios
 
-Axios para requisições HTTP
+Axios for HTTP requests.
 
 ### Zod
 
-Zod, uma biblioteca de validação TypeScript, aprimora a integridade e confiabilidade dos dados.
+Zod, a TypeScript validation library, enhances data integrity and reliability.
 
 ### Vercel
 
-Vercel fornece uma plataforma eficiente e escalável para hospedagem, com integração contínua e deploy automatizado.
+Vercel provides an efficient, scalable hosting platform with continuous integration and automated deployment.
 
-# Contribuições
+# Contributions
 
-Contribuições são bem-vindas! Se encontrar problemas ou tiver sugestões de melhorias, abra uma issue ou crie uma pull request.
+Contributions are welcome! If you encounter issues or have suggestions for improvements, open an issue or create a pull request.
 
-Bons bate-papos! 🚀
+Enjoy your chats! 🚀
