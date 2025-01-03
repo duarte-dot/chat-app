@@ -1,4 +1,4 @@
-# [Chat App](https://duarte-dot-chat-app.vercel.app)
+# Chat App
 
 Welcome to Chat App! This application provides an intuitive, hassle-free platform to connect and communicate with friends and colleagues.
 
