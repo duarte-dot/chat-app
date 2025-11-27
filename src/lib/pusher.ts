@@ -5,12 +5,12 @@ const { PUSHER_APP_ID: appId, PUSHER_APP_SECRET: secret, PUSHER_APP_CLUSTER: clu
 
 export const pusherServer = new PusherServer({
   appId: appId!,
-  key: "56236ec0fa30b0d11a08",
+  key: "8b761a1f3fdabc647d92",
   secret: secret!,
   cluster: "sa1",
   useTLS: true,
 });
 
-export const pusherClient = new PusherClient("56236ec0fa30b0d11a08", {
+export const pusherClient = new PusherClient("8b761a1f3fdabc647d92", {
   cluster: "sa1",
 });
